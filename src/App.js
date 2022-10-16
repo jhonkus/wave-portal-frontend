@@ -2,12 +2,15 @@ import React, { useEffect, useState, useCallback } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/WavePortal.json";
+import Spinner from 'react-bootstrap/Spinner';
 
 
 const getEthereumObject = () => window.ethereum;
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
+  const [totalWave, setTotalWave] = useState(0);
+  const [isMining, setIsMining] = useState(false);
 
   /**
    * Create a variable here that holds the contract address after you deploy!
@@ -25,6 +28,7 @@ function App() {
       const { ethereum } = window;
 
       if (ethereum) {
+        setIsMining(true);
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
@@ -35,7 +39,7 @@ function App() {
         /*
         * Execute the actual wave from your smart contract
         */
-         const waveTxn = await wavePortalContract.wave();
+         const waveTxn = await wavePortalContract.wave(currentAccount);
          console.log("Mining...", waveTxn.hash);
  
          await waveTxn.wait();
@@ -44,10 +48,14 @@ function App() {
          count = await wavePortalContract.getTotalWaves();
          console.log("Retrieved total wave count...", count.toNumber());
 
+         setTotalWave(count.toNumber());
+         setIsMining(false);
+
       } else {
         console.log("Ethereum object doesn't exist!");
       }
     } catch (error) {
+      setIsMining(false);
       console.log(error);
     }
   }
@@ -119,16 +127,21 @@ function App() {
     <div className="mainContainer">
       <div className="dataContainer">
         <div className="header">👋 Hello there!</div>
-
+ 
         <div className="bio">
           I am john and I worked on Ethereum Smart contract so that's pretty
           cool right? Connect your Ethereum wallet and wave at me!
         </div>
 
+
+       
         <button className="waveButton" onClick={wave}>
           Wave at Me
         </button>
 
+        {isMining && <div><Spinner animation="grow" size="sm" /> Wait mining ... </div>}
+
+        {!isMining && totalWave > 0 && <div>Total wave count: {totalWave}</div>}
         {/*
          * If there is no currentAccount render this button
          */}
