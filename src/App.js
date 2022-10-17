@@ -22,6 +22,15 @@ function App() {
   const [allWaves, setAllWaves] = useState([]);
   const [messageValue, setMessageValue] = useState("");
 
+  function reverseArr(input) {
+    var ret = new Array;
+    for(var i = input.length-1; i >= 0; i--) {
+        ret.push(input[i]);
+    }
+    return ret;
+}
+
+
   /**
    * Create a variable here that holds the contract address after you deploy!
    */
@@ -368,7 +377,9 @@ function App() {
           </div>
         )}
 
-        {allWaves.map((wave, index) => {
+        {/* {allWaves.reverse()} */}
+
+        {reverseArr(allWaves).slice(0,200).map((wave, index) => {
           return (
             <div
               key={index}
@@ -376,9 +387,10 @@ function App() {
                 backgroundColor: "OldLace",
                 marginTop: "16px",
                 padding: "8px",
+                fontSize: "0.8em"
               }}
             >
-              <div>No: {index + 1}</div>
+              <div>No: {allWaves.length - index}</div>
               <div>Address: {wave.address}</div>
               <div>Time: {wave.timestamp.toString()}</div>
               <div>Message: {wave.message}</div>
