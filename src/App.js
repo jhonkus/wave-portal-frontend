@@ -306,14 +306,14 @@ function App() {
         <div className="bio">
           <Image
             src="https://avatars.githubusercontent.com/u/8806824?v=4"
-            style={{ width: "70px", height: "70px", marginRight: "10px" }}
+            style={{ width: "70px", height: "70px", margin: "10px" }}
             align="left"
             alt="john image"
             roundedCircle
           />
-          I'm a developer, looking for blockchain jobs! Connect your Ethereum
-          wallet to the <b>Goerli</b> network and contact me if you have a blockchain
-          remote Job, full time or part time!!
+          I am a developer and also write articles on medium.com,  <a href="https://putukusuma.medium.com/" target="_new">here is my articles.</a> Currently I'm looking for a blockchain job! Connect your Ethereum wallet to the <b>Goerli</b> network
+ and contact me if you have any blockchain remote job be it full time or part time!
+ or you can leave a message just to say hi to me.
         </div>
 
         {isRightNetwork &&
