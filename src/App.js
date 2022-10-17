@@ -13,7 +13,7 @@ function App() {
   const [isRightNetwork, setIsRightNetwork] = useState(true);
   const [isConnectingToWallet, setIsConnectingToWallet] = useState(false);
   const [noWallet, setNoWallet] = useState(true);
-
+  const [isError, setIsError] = useState(false);
   /*
    * All state property to store all waves
    */
@@ -49,7 +49,7 @@ function App() {
          * Call the getAllWaves method from your Smart Contract
          */
         const waves = await wavePortalContract.getAllWaves();
-          
+
         /*
          * We only need address, timestamp, and message in our UI so let's
          * pick those out
@@ -75,6 +75,7 @@ function App() {
   };
 
   const wave = async () => {
+    setIsError(false);
     setIsConnectingToWallet(true);
 
     try {
@@ -117,6 +118,7 @@ function App() {
     } catch (error) {
       setIsConnectingToWallet(false);
       console.log(error);
+      setIsError(true);
     } finally {
       setIsMining(false);
     }
@@ -279,6 +281,12 @@ function App() {
               Wave at Me
             </Button>
           )}
+
+        {isError && (
+          <div style={{ textAlign: "center", color: "red" }}>
+            Transaction not success, please try in next 5 minutes
+          </div>
+        )}
 
         {isMining && (
           <div style={{ color: "blue" }}>
