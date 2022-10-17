@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/WavePortal.json";
 import { Spinner, Button } from "react-bootstrap";
+import Form from "react-bootstrap/Form";
 
 const getEthereumObject = () => window.ethereum;
 
@@ -14,10 +15,12 @@ function App() {
   const [isConnectingToWallet, setIsConnectingToWallet] = useState(false);
   const [noWallet, setNoWallet] = useState(true);
   const [isError, setIsError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
   /*
    * All state property to store all waves
    */
   const [allWaves, setAllWaves] = useState([]);
+  const [messageValue, setMessageValue] = useState("");
 
   /**
    * Create a variable here that holds the contract address after you deploy!
@@ -75,6 +78,18 @@ function App() {
   }, [contractABI]);
 
   const wave = async () => {
+    if (messageValue.length === 0 || messageValue.length > 500) {
+      console.log("No message inputed!");
+      setErrorMsg("Please write something, even just 'Hi', max 500 character!");
+      setIsError(true);
+
+      return;
+    }
+
+    setErrorMsg("");
+    setIsError(false);
+    // console.log("Gif link:", inputValue);
+
     setIsError(false);
     setIsConnectingToWallet(true);
 
@@ -96,7 +111,7 @@ function App() {
         /*
          * Execute the actual wave from your smart contract
          */
-        const waveTxn = await wavePortalContract.wave("This is a message", {
+        const waveTxn = await wavePortalContract.wave(messageValue, {
           gasLimit: 500000,
         });
         setIsConnectingToWallet(false);
@@ -118,9 +133,13 @@ function App() {
     } catch (error) {
       setIsConnectingToWallet(false);
       console.log(error);
+      setErrorMsg(
+        "Process was fail or canceled!, if fail please try in next 5 minutes"
+      );
       setIsError(true);
     } finally {
       setIsMining(false);
+      setMessageValue("");
     }
   };
 
@@ -152,7 +171,7 @@ function App() {
         console.log("Found an authorized account:", account);
         if (account !== null) {
           setCurrentAccount(account);
-               getAllWaves();
+          getAllWaves();
         }
         // return account;
       } else {
@@ -239,6 +258,14 @@ function App() {
     };
   }, [contractABI]);
 
+  const onMessageChange = (event) => {
+    const { value } = event.target;
+    console.log("Msg: ", value);
+    setMessageValue(value);
+
+    console.log("Msg: ", messageValue);
+  };
+
   /*
    * The passed callback function will be run when the page loads.
    * More technically, when the App component "mounts".
@@ -278,16 +305,42 @@ function App() {
           !isConnectingToWallet &&
           !isMining &&
           currentAccount && (
-            <Button className="waveButton" variant="success" onClick={wave}>
-              Wave at Me
-            </Button>
-          )}
+            <>
+              <Form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  wave();
+                }}
+              >
+                <Form.Group
+                  className="mb-3"
+                  controlId="exampleForm.ControlTextarea1"
+                >
+                  <Form.Label>Message</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    onChange={onMessageChange}
+                    value={messageValue}
+                    rows={5}
+                  />
+                </Form.Group>
 
-        {isError && (
-          <div style={{ textAlign: "center", color: "red" }}>
-            Transaction not success, please try in next 5 minutes
-          </div>
-        )}
+                {isError && (
+                  <div style={{ textAlign: "left", marginBottom: '20px', color: "red" }}>
+                    {errorMsg}
+                  </div>
+                )}
+
+                <button type="submit" className="cta-button submit-gif-button">
+                  Wave at Me
+                </button>
+              </Form>
+
+              {/* <Button className="waveButton" variant="success" onClick={wave}>
+              Wave at Me
+            </Button> */}
+            </>
+          )}
 
         {isMining && (
           <div style={{ color: "blue" }}>
@@ -315,7 +368,7 @@ function App() {
           </div>
         )}
 
-        { allWaves.map((wave, index) => {
+        {allWaves.map((wave, index) => {
           return (
             <div
               key={index}
