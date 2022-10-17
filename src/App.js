@@ -23,13 +23,12 @@ function App() {
   const [messageValue, setMessageValue] = useState("");
 
   function reverseArr(input) {
-    var ret = new Array;
-    for(var i = input.length-1; i >= 0; i--) {
-        ret.push(input[i]);
+    var ret = new Array();
+    for (var i = input.length - 1; i >= 0; i--) {
+      ret.push(input[i]);
     }
     return ret;
-}
-
+  }
 
   /**
    * Create a variable here that holds the contract address after you deploy!
@@ -305,11 +304,16 @@ function App() {
         <div className="header">👋 Hello there!</div>
 
         <div className="bio">
-          <Image src="https://avatars.githubusercontent.com/u/8806824?v=4" style={{width:'70px', height:'70px', marginRight:'10px'}} 
-          align="left" alt="john image" roundedCircle/>
-
-          I am developer, looking blockchain job! Connect your Ethereum wallet to <b>Goerli</b> 
-          network and contact me if you have any blockchain remote Job, full time or part time!
+          <Image
+            src="https://avatars.githubusercontent.com/u/8806824?v=4"
+            style={{ width: "70px", height: "70px", marginRight: "10px" }}
+            align="left"
+            alt="john image"
+            roundedCircle
+          />
+          I'm a developer, looking for blockchain jobs! Connect your Ethereum
+          wallet to the <b>Goerli</b> network and contact me if you have a blockchain
+          remote Job, full time or part time!!
         </div>
 
         {isRightNetwork &&
@@ -337,14 +341,21 @@ function App() {
                 </Form.Group>
 
                 {isError && (
-                  <div style={{ textAlign: "left", marginBottom: '20px', color: "red" }}>
+                  <div
+                    style={{
+                      textAlign: "left",
+                      marginBottom: "20px",
+                      color: "red",
+                    }}
+                  >
                     {errorMsg}
                   </div>
                 )}
 
-                <button type="submit" className="cta-button submit-gif-button">
-                  Wave at Me
+                <button type="submit" className="cta-button submit-msg-button">
+                  Send message
                 </button>
+                
               </Form>
 
               {/* <Button className="waveButton" variant="success" onClick={wave}>
@@ -381,24 +392,26 @@ function App() {
 
         {/* {allWaves.reverse()} */}
 
-        {reverseArr(allWaves).slice(0,200).map((wave, index) => {
-          return (
-            <div
-              key={index}
-              style={{
-                backgroundColor: "OldLace",
-                marginTop: "16px",
-                padding: "8px",
-                fontSize: "0.8em"
-              }}
-            >
-              <div>No: {allWaves.length - index}</div>
-              <div>Address: {wave.address}</div>
-              <div>Time: {wave.timestamp.toString()}</div>
-              <div>Message: {wave.message}</div>
-            </div>
-          );
-        })}
+        {reverseArr(allWaves)
+          .slice(0, 200)
+          .map((wave, index) => {
+            return (
+              <div
+                key={index}
+                style={{
+                  backgroundColor: "OldLace",
+                  marginTop: "16px",
+                  padding: "8px",
+                  fontSize: "0.8em",
+                }}
+              >
+                <div>No: {allWaves.length - index}</div>
+                <div>Address: {wave.address}</div>
+                <div>Time: {wave.timestamp.toString()}</div>
+                <div>Message: {wave.message}</div>
+              </div>
+            );
+          })}
       </div>
     </div>
   );
