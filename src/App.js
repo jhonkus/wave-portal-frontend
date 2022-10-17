@@ -32,7 +32,7 @@ function App() {
   /*
    * Create a method that gets all waves from your contract
    */
-  const getAllWaves = async () => {
+  const getAllWaves = useCallback(async () => {
     try {
       const { ethereum } = window;
       if (ethereum) {
@@ -72,7 +72,7 @@ function App() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [contractABI]);
 
   const wave = async () => {
     setIsError(false);
@@ -152,6 +152,7 @@ function App() {
         console.log("Found an authorized account:", account);
         if (account !== null) {
           setCurrentAccount(account);
+               getAllWaves();
         }
         // return account;
       } else {
@@ -162,7 +163,7 @@ function App() {
       console.error(error);
       return null;
     }
-  }, []);
+  }, [getAllWaves]);
 
   const connectWallet = async () => {
     try {
@@ -314,7 +315,7 @@ function App() {
           </div>
         )}
 
-        {!isConnectingToWallet && !isMining && allWaves.map((wave, index) => {
+        { allWaves.map((wave, index) => {
           return (
             <div
               key={index}
