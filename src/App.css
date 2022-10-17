@@ -22,13 +22,13 @@
   text-align: center;
   color: gray;
   margin-top: 16px;
+  margin-bottom: 20px;
 }
 
-.waveButton {
-  cursor: pointer;
-  margin-top: 16px;
-  padding: 8px;
-  border: 0;
-  border-radius: 5px;
-  
+
+.warning{
+  text-align: center;
+  color: red;
+  border: 1px dotted red;
+  margin-bottom: 40px;
 }

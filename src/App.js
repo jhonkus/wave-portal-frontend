@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/WavePortal.json";
-import Spinner from "react-bootstrap/Spinner";
+import { Spinner, Button } from "react-bootstrap";
 
 const getEthereumObject = () => window.ethereum;
 
@@ -10,6 +10,10 @@ function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [totalWave, setTotalWave] = useState(0);
   const [isMining, setIsMining] = useState(false);
+  const [isRightNetwork, setIsRightNetwork] = useState(true);
+  const [isConnectingToWallet, setIsConnectingToWallet] = useState(false);
+  const [noWallet, setNoWallet] = useState(true);
+
   /*
    * All state property to store all waves
    */
@@ -18,7 +22,7 @@ function App() {
   /**
    * Create a variable here that holds the contract address after you deploy!
    */
-  const contractAddress = "0xe22b34533E99F37e6CdE6DDC9DcfbC20CdaA754d";
+  const contractAddress = "0x6F9177820CdC1768a51d549BDf524Af09C98CE3b";
 
   /**
    * Create a variable here that references the abi content!
@@ -29,12 +33,12 @@ function App() {
    * Create a method that gets all waves from your contract
    */
   const getAllWaves = async () => {
-    console.log("== getAllWaves==");
     try {
       const { ethereum } = window;
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
+
         const wavePortalContract = new ethers.Contract(
           contractAddress,
           contractABI,
@@ -45,20 +49,19 @@ function App() {
          * Call the getAllWaves method from your Smart Contract
          */
         const waves = await wavePortalContract.getAllWaves();
-
+          
         /*
          * We only need address, timestamp, and message in our UI so let's
          * pick those out
          */
-        let wavesCleaned = [];
-        waves.forEach((wave) => {
-          wavesCleaned.push({
+        const wavesCleaned = waves.map((wave) => {
+          return {
             address: wave.waver,
             timestamp: new Date(wave.timestamp * 1000),
             message: wave.message,
-          });
+          };
         });
-        console.log("==wavesCleaned: ",wavesCleaned);
+
         /*
          * Store our data in React State
          */
@@ -72,11 +75,12 @@ function App() {
   };
 
   const wave = async () => {
+    setIsConnectingToWallet(true);
+
     try {
       const { ethereum } = window;
 
       if (ethereum) {
-        setIsMining(true);
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
         const wavePortalContract = new ethers.Contract(
@@ -91,7 +95,11 @@ function App() {
         /*
          * Execute the actual wave from your smart contract
          */
-        const waveTxn = await wavePortalContract.wave("This is a message");
+        const waveTxn = await wavePortalContract.wave("This is a message", {
+          gasLimit: 500000,
+        });
+        setIsConnectingToWallet(false);
+        setIsMining(true);
         console.log("Mining...", waveTxn.hash);
 
         await waveTxn.wait();
@@ -107,8 +115,10 @@ function App() {
         console.log("Ethereum object doesn't exist!");
       }
     } catch (error) {
-      setIsMining(false);
+      setIsConnectingToWallet(false);
       console.log(error);
+    } finally {
+      setIsMining(false);
     }
   };
 
@@ -125,8 +135,12 @@ function App() {
        */
       if (!ethereum) {
         console.error("Make sure you have Metamask!");
+        setNoWallet(true);
+
         return null;
       }
+
+      setNoWallet(false);
 
       console.log("We have the Ethereum object", ethereum);
       const accounts = await ethereum.request({ method: "eth_accounts" });
@@ -150,6 +164,7 @@ function App() {
 
   const connectWallet = async () => {
     try {
+      setIsConnectingToWallet(true);
       const ethereum = getEthereumObject();
       if (!ethereum) {
         alert("Get MetaMask!");
@@ -161,12 +176,65 @@ function App() {
       });
 
       console.log("Connected", accounts[0]);
+
+      if (accounts.length > 0) {
+        let chainId = await ethereum.request({ method: "eth_chainId" });
+        console.log("Connected to chain " + chainId);
+
+        // String, hex code of the chainId of the Rinkebey test network
+        const goerliChainId = "0x5";
+        if (chainId !== goerliChainId) {
+          setIsRightNetwork(false);
+          // alert("You are not connected to the Goerli Test Network!");
+        } else {
+          setIsRightNetwork(true);
+          console.log("You are connected to goerli network!");
+        }
+      }
       setCurrentAccount(accounts[0]);
-   
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsConnectingToWallet(false);
     }
   };
+
+  /**
+   * Listen in for emitter events!
+   */
+  useEffect(() => {
+    let wavePortalContract;
+
+    const onNewWave = (from, timestamp, message) => {
+      console.log("NewWave", from, timestamp, message);
+      setAllWaves((prevState) => [
+        ...prevState,
+        {
+          address: from,
+          timestamp: new Date(timestamp * 1000),
+          message: message,
+        },
+      ]);
+    };
+
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      wavePortalContract = new ethers.Contract(
+        contractAddress,
+        contractABI,
+        signer
+      );
+      wavePortalContract.on("NewWave", onNewWave);
+    }
+
+    return () => {
+      if (wavePortalContract) {
+        wavePortalContract.off("NewWave", onNewWave);
+      }
+    };
+  }, [contractABI]);
 
   /*
    * The passed callback function will be run when the page loads.
@@ -179,19 +247,41 @@ function App() {
   return (
     <div className="mainContainer">
       <div className="dataContainer">
+        {noWallet && (
+          <div className="warning">
+            Sorry, we cannot find Metamask wallet installed ! Please install it
+            first,{" "}
+            <a href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn">
+              click here
+            </a>
+          </div>
+        )}
+
+        {!isRightNetwork && currentAccount && (
+          <div className="warning">
+            Your walet not conecting to Goerli network, please switch to Goerli
+            network and try to connect again!
+          </div>
+        )}
         <div className="header">👋 Hello there!</div>
 
         <div className="bio">
           I am john and I worked on Ethereum Smart contract so that's pretty
-          cool right? Connect your Ethereum wallet and wave at me!
+          cool right? Connect your Ethereum wallet to <b>Goerli</b> network and
+          wave at me!
         </div>
 
-        <button className="waveButton" onClick={wave}>
-          Wave at Me
-        </button>
+        {isRightNetwork &&
+          !isConnectingToWallet &&
+          !isMining &&
+          currentAccount && (
+            <Button className="waveButton" variant="success" onClick={wave}>
+              Wave at Me
+            </Button>
+          )}
 
         {isMining && (
-          <div>
+          <div style={{ color: "blue" }}>
             <Spinner animation="grow" size="sm" /> Wait mining ...{" "}
           </div>
         )}
@@ -200,10 +290,20 @@ function App() {
         {/*
          * If there is no currentAccount render this button
          */}
-        {!currentAccount && (
-          <button className="waveButton" onClick={connectWallet}>
-            Connect Wallet
-          </button>
+        {(!currentAccount || !isRightNetwork) && (
+          <>
+            <Button variant="outline-primary" onClick={connectWallet}>
+              Connect Wallet
+            </Button>
+          </>
+        )}
+
+        {isConnectingToWallet && (
+          <div style={{ color: "blue" }}>
+            {" "}
+            <Spinner animation="border" size="sm" /> Waiting confirmation,
+            please see your wallet and confirm the transaction!
+          </div>
         )}
 
         {allWaves.map((wave, index) => {
