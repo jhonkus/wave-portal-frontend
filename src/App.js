@@ -314,7 +314,7 @@ function App() {
           </div>
         )}
 
-        {allWaves.map((wave, index) => {
+        {!isConnectingToWallet && !isMining && allWaves.map((wave, index) => {
           return (
             <div
               key={index}
