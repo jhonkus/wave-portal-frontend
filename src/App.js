@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/WavePortal.json";
-import { Spinner, Button } from "react-bootstrap";
+import { Spinner, Button, Image } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 
 const getEthereumObject = () => window.ethereum;
@@ -305,9 +305,11 @@ function App() {
         <div className="header">👋 Hello there!</div>
 
         <div className="bio">
-          I am john and I worked on Ethereum Smart contract so that's pretty
-          cool right? Connect your Ethereum wallet to <b>Goerli</b> network and
-          wave at me!
+          <Image src="https://avatars.githubusercontent.com/u/8806824?v=4" style={{width:'70px', height:'70px', marginRight:'10px'}} 
+          align="left" alt="john image" roundedCircle/>
+
+          I am developer, looking blockchain job! Connect your Ethereum wallet to <b>Goerli</b> 
+          network and contact me if you have any blockchain remote Job, full time or part time!
         </div>
 
         {isRightNetwork &&
