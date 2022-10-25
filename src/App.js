@@ -311,9 +311,8 @@ function App() {
             alt="john image"
             roundedCircle
           />
-          I am a developer and also write articles on medium.com,  <a href="https://putukusuma.medium.com/" target="_new">here is my articles.</a> Currently I'm looking for a blockchain job! Connect your Ethereum wallet (<b>Metamask</b> wallet) to the <b style={{color: 'red'}}>Goerli</b> network
- and contact me if you have any blockchain remote job be it full time or part time!
- or you can leave a message just to say hi to me.
+          I am a developer and also write articles on medium.com,  <a href="https://putukusuma.medium.com/" target="_new">here is my articles.</a> Currently I'm learning smart contract! Connect your Ethereum wallet (<b>Metamask</b> wallet) to the <b style={{color: 'red'}}>Goerli</b> network
+ and leave a message just to say hi to me.
         </div>
 
         {isRightNetwork &&
